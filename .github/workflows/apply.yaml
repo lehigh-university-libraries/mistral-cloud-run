@@ -1,0 +1,90 @@
+name: Terraform Apply
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  TF_VAR_project: ${{ secrets.GCLOUD_PROJECT }}
+jobs:
+  apply:
+    name: terraform apply
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@6189d56e4096ee891640bb02ac264be376592d6a # v2
+        with:
+          version: "latest"
+
+      - name: Authenticate to Google Cloud
+        id: "auth"
+        uses: google-github-actions/auth@6fc4af4b145ae7821d527454aa9bd537d1f2dc5f # v2
+        with:
+          workload_identity_provider: ${{ secrets.GCLOUD_OIDC_POOL }}
+          service_account: ${{ secrets.GSA }}
+          token_format: "access_token"
+
+      - name: Configure gcloud
+        run: |
+          gcloud config set project ${{ secrets.GCLOUD_PROJECT }}
+          gcloud config set disable_prompts true
+
+      - name: "GAR login"
+        uses: "docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772" # v3
+        with:
+          registry: "us-docker.pkg.dev"
+          username: "oauth2accesstoken"
+          password: "${{ steps.auth.outputs.access_token }}"
+
+      - name: extract docker variables
+        id: vars
+        run: |
+          DOCKER_IMAGE=us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT }}/internal/mistral
+
+          TAG=$(echo "${GITHUB_REF#refs/heads/}" | sed 's/[^a-zA-Z0-9._-]//g' | awk '{print substr($0, length($0)-120)}')
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            TAG=$(echo "${GITHUB_REF#refs/tags/}" | sed 's/[^a-zA-Z0-9._-]//g' | awk '{print substr($0, length($0)-120)}')
+          fi
+
+          CACHE_TO=""
+          if [ "${TAG}" = "main" ]; then
+            CACHE_TO="type=registry,ref=$DOCKER_IMAGE:cache,mode=max"
+          fi
+          CACHE_FROM="type=registry,ref=$DOCKER_IMAGE:cache"
+
+          {
+            echo "image=$DOCKER_IMAGE"
+            echo "tag=$TAG"
+            echo "cache-to=$CACHE_TO"
+            echo "cache-from=$CACHE_FROM"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push GAR
+        id: build
+        uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # v6
+        with:
+          push: true
+          tags: |
+            us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT }}/internal/mistral:${{ steps.vars.outputs.tag }}
+            ghcr.io/lehigh-university-libraries/mistral:${{ steps.vars.outputs.tag }}
+
+      - name: Terraform Init
+        run: terraform init -upgrade  > /dev/null 2>&1
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve > /dev/null 2>&1
+        env:
+          TF_VAR_image_digest: ${{ steps.build.outputs.digest }}
