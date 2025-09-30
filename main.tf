@@ -1,5 +1,4 @@
 terraform {
-  required_version = "= 1.5.7"
   required_providers {
     github = {
       source  = "integrations/github"
@@ -24,7 +23,7 @@ provider "google" {
 
 
 module "ollama" {
-  source = "git::https://github.com/libops/terraform-cloudrun-v2?ref=0.3.1"
+  source = "git::https://github.com/libops/terraform-cloudrun-v2?ref=0.3.2"
 
   name          = "ollama"
   project       = var.project
@@ -39,6 +38,7 @@ module "ollama" {
       gpus   = 1
     }
   ])
+  skipNeg = true
   regions = ["us-central1"]
   providers = {
     google = google.default
