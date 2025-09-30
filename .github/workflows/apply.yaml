@@ -79,7 +79,6 @@ jobs:
           push: true
           tags: |
             us-docker.pkg.dev/${{ secrets.GCLOUD_PROJECT }}/internal/mistral:${{ steps.vars.outputs.tag }}
-            ghcr.io/lehigh-university-libraries/mistral:${{ steps.vars.outputs.tag }}
 
       - name: Terraform Init
         run: terraform init -upgrade  > /dev/null 2>&1
