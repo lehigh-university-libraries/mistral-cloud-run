@@ -1,0 +1,53 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: libtech-ollama
+spec:
+  selector:
+    app: libtech-ollama
+  ports:
+    - protocol: TCP
+      targetPort: 8080
+      port: 8989
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libtech-ollama
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: libtech-ollama
+  template:
+    metadata:
+      labels:
+        app: libtech-ollama
+    spec:
+      volumes:
+        - name: storage-volume
+          emptyDir:
+            sizeLimit: 18Gi
+      containers:
+        - name: mistral
+          image: ollama/ollama:0.12.6
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: "OLLAMA_MODELS"
+              value: "/data"
+            - name: "OLLAMA_HOST"
+              value: "0.0.0.0:8080"
+          resources:
+            requests:
+              memory: "32Gi"
+              cpu: "500m"
+            limits:
+              memory: "32Gi"
+              nvidia.com/gpu: 4
+          ports:
+            - containerPort: 8080
+              hostPort: 8989
+          volumeMounts:
+            - name: storage-volume
+              mountPath: /data
