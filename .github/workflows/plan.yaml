@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
 
       - name: Install Terraform
         uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
@@ -46,7 +46,7 @@ jobs:
           gcloud config set project ${{ secrets.GCLOUD_PROJECT }}
           gcloud config set disable_prompts true
 
-      - uses: "docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1" # v3
+      - uses: "docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef" # v3
         name: "Docker login"
         with:
           registry: "us-docker.pkg.dev"
