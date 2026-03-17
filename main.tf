@@ -22,12 +22,24 @@ provider "google" {
 }
 
 
+resource "google_service_account" "gsa" {
+  account_id = "cr-ollama"
+  project    = var.project
+}
+
+resource "google_project_iam_member" "sa_role" {
+  project = var.project
+  role    = "roles/iam.serviceAccountUser"
+  member  = format("serviceAccount:%s", google_service_account.gsa.email)
+}
+
 module "ollama" {
   source = "git::https://github.com/libops/terraform-cloudrun-v2?ref=0.5.0"
 
   name          = "ollama"
   project       = var.project
-  max_instances = 1
+  gsa           = google_service_account.gsa.email
+  max_instances = 7
   containers = tolist([
     {
       name   = "ollama",
@@ -39,7 +51,7 @@ module "ollama" {
     }
   ])
   skipNeg = true
-  regions = ["us-central1"]
+  regions = ["us-east4"]
   providers = {
     google = google.default
   }

@@ -1,0 +1,133 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: islandora-microservices
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"
+spec:
+  tls:
+    - hosts:
+        - isle-microservices.cc.lehigh.edu
+      secretName: cc-tls
+  ingressClassName: nginx
+  rules:
+    - host: isle-microservices.cc.lehigh.edu
+      http:
+        paths:
+          - path: /libreoffice
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-libreoffice
+                port:
+                  number: 8080
+          - path: /crayfits
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-crayfits
+                port:
+                  number: 8080
+          - path: /homarus
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-ffmpeg
+                port:
+                  number: 8080
+          - path: /houdini
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-imagemagick
+                port:
+                  number: 8080
+          - path: /hypercube
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-tesseract
+                port:
+                  number: 8080
+          - path: /whisper
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-whisper
+                port:
+                  number: 8080
+          - path: /coverpage
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-coverpage
+                port:
+                  number: 8080
+          - path: /cache-warmer
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-cache-warmer
+                port:
+                  number: 8080
+          - path: /mergepdf
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-mergepdf
+                port:
+                  number: 8080
+          - path: /ocrpdf
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-ocrpdf
+                port:
+                  number: 8080
+          - path: /openai-htr
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-openai-htr
+                port:
+                  number: 8080
+          - path: /cleanpdf
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-cleanpdf
+                port:
+                  number: 8080
+          - path: /transformer
+            pathType: Prefix
+            backend:
+              service:
+                name: sentence-transformer
+                port:
+                  number: 8080
+          - path: /warc
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-tn-warc
+                port:
+                  number: 8080
+          - path: /zip
+            pathType: Prefix
+            backend:
+              service:
+                name: islandora-tn-zip
+                port:
+                  number: 8080
+          - path: /ollama(/|$)(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: libtech-ollama
+                port:
+                  number: 8080

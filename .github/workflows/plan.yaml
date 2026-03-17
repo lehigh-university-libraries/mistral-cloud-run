@@ -56,6 +56,21 @@ jobs:
       - name: Terraform Init
         run: terraform init -upgrade
 
+      - name: Read current image digest from state
+        id: current_image
+        run: |
+          digest=$(terraform state pull | jq -r '.. | strings
+                | select(test("^us-docker\\.pkg\\.dev/.+/internal/mistral:[^@]+@sha256:[0-9a-f]{64}$"))
+                | capture("@(?<digest>sha256:[0-9a-f]{64})$").digest
+            ')
+
+          if [ -z "$digest" ]; then
+            echo "Unable to find current image digest in Terraform state." >&2
+            exit 1
+          fi
+
+          echo "image_digest=$digest" >> "$GITHUB_OUTPUT"
+
       - name: Terraform Plan
         id: plan
         run: |
@@ -64,6 +79,8 @@ jobs:
           out="${out//$'\n'/'%0A'}"
           out="${out//$'\r'/'%0D'}"
           echo "::set-output name=plan::$out"
+        env:
+          TF_VAR_image_digest: ${{ steps.current_image.outputs.image_digest }}
         continue-on-error: true
 
       - name: Post comment with Terraform plan
@@ -112,4 +129,3 @@ jobs:
                 body: newCommentBody
               });
             }
-
