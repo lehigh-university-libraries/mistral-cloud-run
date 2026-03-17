@@ -27,7 +27,7 @@ module "ollama" {
 
   name          = "ollama"
   project       = var.project
-  max_instances = 1
+  max_instances = 10
   containers = tolist([
     {
       name   = "ollama",
@@ -39,7 +39,7 @@ module "ollama" {
     }
   ])
   skipNeg = true
-  regions = ["us-central1"]
+  regions = ["us-east4"]
   providers = {
     google = google.default
   }
