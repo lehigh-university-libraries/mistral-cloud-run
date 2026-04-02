@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Install Terraform
-        uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        uses: hashicorp/setup-terraform@5e8dbf3c6d9deaf4193ca7a8fb23f2ac83bb6c85 # v4
         with:
           terraform_version: 1.5.7
 
@@ -43,7 +43,7 @@ jobs:
           gcloud config set disable_prompts true
 
       - name: "GAR login"
-        uses: "docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9" # v3
+        uses: "docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121" # v4
         with:
           registry: "us-docker.pkg.dev"
           username: "oauth2accesstoken"
@@ -74,7 +74,7 @@ jobs:
 
       - name: Build and push GAR
         id: build
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294 # v7
         with:
           push: true
           tags: |
