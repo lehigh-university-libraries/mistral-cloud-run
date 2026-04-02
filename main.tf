@@ -2,11 +2,11 @@ terraform {
   required_providers {
     github = {
       source  = "integrations/github"
-      version = "6.9.1"
+      version = "6.11.1"
     }
     google = {
       source  = "hashicorp/google"
-      version = "7.15.0"
+      version = "7.26.0"
     }
   }
 
@@ -34,7 +34,7 @@ resource "google_project_iam_member" "sa_role" {
 }
 
 module "ollama" {
-  source = "git::https://github.com/libops/terraform-cloudrun-v2?ref=0.5.0"
+  source = "git::https://github.com/libops/terraform-cloudrun-v2?ref=0.5.1"
 
   name          = "ollama"
   project       = var.project
