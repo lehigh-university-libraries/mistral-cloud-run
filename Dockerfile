@@ -1,4 +1,4 @@
-FROM ollama/ollama:0.19.0@sha256:bf240c2847a8bc7b2c630b85dab5d1dedcba257b551d5fc9b290ce544d59272a
+FROM ollama/ollama:0.21.0@sha256:d3d553bdfbcc7f55dd5ddf42c4cbe3a927aa9bb1802710d35e94656ca5aea02b
 
 ENV \
   OLLAMA_HOST=0.0.0.0:8080 \
